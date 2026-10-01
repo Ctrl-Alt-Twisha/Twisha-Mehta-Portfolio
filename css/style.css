@@ -2,32 +2,32 @@
   color-scheme: light;
   --sea:#7fb3c4;
   --sea-deep:#4f92a8;
-  --sand:#f5ebe0;
-  --sand-deep:#e6cb9d;
-  --sand-line:#d3b98c;
+  --sand:#f3e9d4;
+  --sand-deep:#e3c99b;
+  --sand-line:#d8c19a;
   --ink:#3a2f22;
   --ink-soft:#6b5c46;
   --coral:#d97a63;
-  --paper:#faf4e8;
+  --paper:#f1e4c9;
 }
-
+/* Keep the beach palette even if a viewer's OS/browser is set to dark mode —
+   this page is designed as one light, sunny theme and should never flip to
+   a mismatched dark scheme that leaves text unreadable. */
 @media (prefers-color-scheme: dark){
   :root:not([data-theme="light"]){
-    --sea:#7fb3c4; --sea-deep:#4f92a8; --sand:#f5ebe0; --sand-deep:#e6cb9d;
-    --sand-line:#d3b98c; --ink:#3a2f22; --ink-soft:#6b5c46; --coral:#d97a63; --paper:#faf4e8;
+    --sea:#7fb3c4; --sea-deep:#4f92a8; --sand:#f3e9d4; --sand-deep:#e3c99b;
+    --sand-line:#d8c19a; --ink:#3a2f22; --ink-soft:#6b5c46; --coral:#d97a63; --paper:#f1e4c9;
   }
 }
 :root[data-theme="dark"]{
-  --sea:#7fb3c4; --sea-deep:#4f92a8; --sand:#f5ebe0; --sand-deep:#e6cb9d;
-  --sand-line:#d3b98c; --ink:#3a2f22; --ink-soft:#6b5c46; --coral:#d97a63; --paper:#faf4e8;
+  --sea:#7fb3c4; --sea-deep:#4f92a8; --sand:#f3e9d4; --sand-deep:#e3c99b;
+  --sand-line:#d8c19a; --ink:#3a2f22; --ink-soft:#6b5c46; --coral:#d97a63; --paper:#f1e4c9;
 }
-
 *{ box-sizing:border-box; }
 html{ scroll-behavior:smooth; }
 html,body{
   margin:0; padding:0; width:100%;
-  background: radial-gradient(circle at 50% 10%, #fcf7ef 0%, #f5ebe0 55%, #e8d7c1 100%);
-  background-attachment: fixed;
+  background:var(--sand);
   font-family:'Inter',sans-serif;
   color:var(--ink);
 }
@@ -40,7 +40,7 @@ header.nav{
   z-index:50;
   display:flex;
   align-items:center;
-  justify-space-between;
+  justify-content:space-between;
   padding:20px clamp(20px, 5vw, 48px);
   background:rgba(250,245,233,0.0);
   transition:background 0.4s ease, box-shadow 0.4s ease;
@@ -48,7 +48,6 @@ header.nav{
 header.nav.scrolled,
 header.nav.solid{
   background:rgba(241,228,201,0.94);
-  -webkit-backdrop-filter:blur(8px);
   backdrop-filter:blur(8px);
   box-shadow:0 1px 0 var(--sand-line);
 }
@@ -132,15 +131,14 @@ body.whirlpool-locked .shell-tooltip{ pointer-events:none; }
   background:linear-gradient(180deg,rgba(2,18,25,0.16),rgba(2,18,25,0.08) 46%,rgba(2,18,25,0.34));
   pointer-events:none;
 }
-/* Disable scrolling after whirlpool finishes */
-body.whirlpool-locked {
-  overflow: hidden !important;
-  height: 100vh !important;
-  touch-action: none; /* Prevents touch dragging on mobile */
-}
 .hero-copy{
   position:absolute;
   inset:0;
+  /* Higher than every .piece (they go up to ~11) so the assembled puzzle
+     tiles don't paint over the greeting — but still LOWER than the modal
+     overlay (40), so opening any page (About, a project, the shell joke)
+     while still on the hero correctly hides this text instead of leaving
+     it floating on top of the overlay. */
   z-index:2;
   display:flex;
   flex-direction:column;
@@ -172,8 +170,8 @@ body.whirlpool-locked {
   text-shadow:0 2px 18px rgba(0,0,0,0.9);
 }
 .scroll-cue{
-  position:fixed;      /* Fixed relative to viewport so it is visible immediately */
-  z-index:100;         /* Keeps it above the hero layers */
+  position:absolute;
+  z-index:3;
   left:50%;
   bottom:30px;
   display:flex;
@@ -186,51 +184,16 @@ body.whirlpool-locked {
   letter-spacing:0.14em;
   text-shadow:0 2px 8px rgba(0,0,0,0.65);
   pointer-events:none;
-  transition:opacity 0.4s ease;
 }
-/* ---------- Force Scroll Indicator Visibility ---------- */
-.scroll-cue {
-  position: fixed !important;
-  bottom: 28px !important;
-  left: 50% !important;
-  transform: translateX(-50%) !important;
-  z-index: 9999 !important; /* Forces it above canvas, stage, and overlays */
-  display: flex !important;
-  flex-direction: column !important;
-  align-items: center !important;
-  gap: 6px !important;
-  color: #ffffff !important;
-  font-family: 'Inter', sans-serif !important;
-  font-size: 0.75rem !important;
-  font-weight: 700 !important;
-  letter-spacing: 0.18em !important;
-  text-shadow: 0 2px 10px rgba(0, 0, 0, 0.9) !important;
-  opacity: 1 !important;
-  visibility: visible !important;
-  pointer-events: none !important;
-}
-
-.scroll-cue-arrow {
-  font-size: 1.4rem !important;
-  line-height: 1 !important;
-  animation: cueFloat 1.6s ease-in-out infinite !important;
-}
-
-@keyframes cueFloat {
-  50% { transform: translateY(6px); }
-}
-.scroll-cue-arrow {
-  font-size: 1.35rem;
-  line-height: 1;
-  animation: cueFloat 1.6s ease-in-out infinite;
-}
-/* Ensure scroll cue is NOT hidden while the page loads */
-body.whirlpool-locked .scroll-cue {
-  opacity: 1 !important;
-  visibility: visible !important;
-}
-@keyframes cueFloat {
-  50% { transform: translateY(6px); }
+.scroll-cue-arrow{ font-size:1.35rem; line-height:1; animation:cueFloat 1.6s ease-in-out infinite; }
+@keyframes cueFloat{ 50%{ transform:translateY(6px); } }
+.whirlpool-fallback{ background-position:center; background-size:cover; }
+.portfolio-start{
+  display:flex;
+  align-items:center;
+  min-height:66svh;
+  padding:90px 0;
+  background:linear-gradient(135deg,#e7d2aa,#f3e9d4 55%,#e3c99b);
 }
 .portfolio-start .wrap{ max-width:960px; }
 .start-kicker{ margin:0 0 16px; color:var(--coral); font:700 0.78rem 'Inter',sans-serif; }
@@ -240,14 +203,16 @@ body.whirlpool-locked .scroll-cue {
 .start-link span{ font-size:1.2rem; }
 
 /* ---------- Sections below the fold ---------- */
-main{ background:transparent; }
+main{ background:var(--sand); }
 .wrap{
   max-width:960px;
   margin:0 auto;
   padding:0 clamp(20px, 5vw, 48px);
 }
 
-.page-hero{ padding:150px 0 40px 0; }
+.page-hero{
+  padding:150px 0 40px 0;
+}
 .page-hero h1{
   font-family:'Quicksand',sans-serif;
   font-weight:700;
@@ -278,7 +243,11 @@ main{ background:transparent; }
   border-radius:16px;
   transition:background 0.2s ease, box-shadow 0.2s ease, transform 0.2s ease;
 }
-.stat:hover{ background:transparent; box-shadow:none; transform:none; }
+.stat:hover{
+  background:transparent;
+  box-shadow:none;
+  transform:none;
+}
 .stat a{ text-decoration:none; color:inherit; display:block; }
 .stat button.open-page{
   display:block;
@@ -287,9 +256,12 @@ main{ background:transparent; }
   border:none;
   appearance:none;
   -webkit-appearance:none;
-  padding:0; margin:0;
-  font-family:inherit; color:inherit;
-  cursor:pointer; text-align:inherit;
+  padding:0;
+  margin:0;
+  font-family:inherit;
+  color:inherit;
+  cursor:pointer;
+  text-align:inherit;
 }
 .stat button.open-page:focus-visible{
   outline:2px solid var(--sea-deep);
@@ -297,7 +269,8 @@ main{ background:transparent; }
   border-radius:8px;
 }
 .stat-thumb{
-  width:86px; height:72px;
+  width:86px;
+  height:72px;
   object-fit:contain;
   margin-bottom:8px;
 }
@@ -316,6 +289,9 @@ main{ background:transparent; }
   color:var(--ink-soft);
   margin-top:2px;
 }
+/* Prize / LeetCode "boxes" — a visible card so it reads as clickable,
+   with a warm hover glow instead of the old underline-on-hover. Bigger
+   size is desktop-only (see media query below); phones keep this base size. */
 .stat-box{
   display:flex !important;
   flex-direction:column;
@@ -336,7 +312,10 @@ main{ background:transparent; }
 }
 .stat-box:active{ transform:translateY(-1px); }
 .stat-box .num, .stat-box .label{ text-decoration:none !important; }
-.amount-black{ color:#1c1a17; font-weight:800; }
+.amount-black{
+  color:#1c1a17;
+  font-weight:800;
+}
 @media (min-width:861px){
   .stat-box{ width:280px !important; padding:22px 36px !important; }
   .stat-box .num{ font-size:2.15rem; white-space:nowrap; }
@@ -344,24 +323,30 @@ main{ background:transparent; }
 }
 
 section{ padding:88px 0; scroll-margin-top:34px; }
+/* Extra breathing room right after the puzzle, and again before Work,
+   so About doesn't feel like it starts the instant you stop scrolling. */
 #about{
   position:relative;
   padding:clamp(92px, 12vh, 145px) 0 145px 0;
-  background: 
-    radial-gradient(ellipse 80% 50% at 50% 0%, rgba(255, 252, 245, 0.85), transparent 75%),
-    linear-gradient(180deg, #f5ebe0 0%, #edd8bf 50%, #e2cbab 100%);
+  background:linear-gradient(180deg, var(--sand) 0%, #ecdfc0 100%);
   overflow:hidden;
 }
-
+/* A bit more room to scroll through, and a small gap so jumping here
+   from the nav doesn't land flush against the header. */
 #work{
   position:relative;
   padding:135px 0 115px 0;
   scroll-margin-top:44px;
+  /* Deep lagoon teal instead of flat navy: still dark, but with a soft
+     sea-glow up top and a faint sunset-coral glow low down so it feels
+     warm and inviting rather than heavy. */
   background:
     radial-gradient(ellipse 65% 55% at 15% 8%, rgba(127,179,196,0.20), transparent 70%),
     radial-gradient(ellipse 55% 45% at 92% 96%, rgba(217,122,99,0.16), transparent 70%),
     linear-gradient(180deg, #0f3640 0%, #0f2f3f 55%, #122a3d 100%);
 }
+/* Shoreline: the sandy-grey wave at the bottom of About flows into the
+   dark water here, so there's no hard cut between the two sections. */
 #work::before{
   content:'';
   position:absolute; top:0; left:0; right:0; height:60px;
@@ -451,7 +436,7 @@ section{ padding:88px 0; scroll-margin-top:34px; }
 #work .project-card:hover .card-icon{ background:#f0a08a; }
 #work .card a{ color:var(--paper); border-bottom-color:var(--sea); }
 
-/* ---------- About cards ---------- */
+/* ---------- About cards: light blue → deep blue so they read as buttons ---------- */
 #about .card.open-page{
   display:flex;
   flex-direction:column;
@@ -467,6 +452,8 @@ section{ padding:88px 0; scroll-margin-top:34px; }
   border-color:rgba(241,228,201,0.75);
   box-shadow:0 6px 14px rgba(15,40,60,0.25);
 }
+/* Emoji strip standing in for a photo on the Journey card (mirrors the
+   five chapters inside it) so both cards have the same shape. */
 .card-thumb-emoji{
   display:flex;
   align-items:center;
@@ -477,6 +464,7 @@ section{ padding:88px 0; scroll-margin-top:34px; }
   font-size:1.6rem;
   line-height:1;
 }
+/* The "Read more" pill — an actual button-looking thing at the bottom of each card */
 .card-cta{
   margin-top:auto;
   align-self:center;
@@ -507,7 +495,7 @@ section{ padding:88px 0; scroll-margin-top:34px; }
 #about .card.open-page:hover .arrow,
 #about .card.open-page:focus-visible .arrow{ transform:translateX(5px); }
 
-/* ---------- Journey So Far ---------- */
+/* ---------- Journey So Far (modal opened from an About card) ---------- */
 .modal .journey-timeline{
   display:flex;
   flex-direction:column;
@@ -572,7 +560,7 @@ section{ padding:88px 0; scroll-margin-top:34px; }
   gap:12px;
   margin-top:6px;
 }
-
+/* Beachy wave dividers that frame the About section top/bottom */
 .wave-top, .wave-bottom{
   position:absolute; left:0; right:0; width:100%; height:60px; line-height:0;
 }
@@ -628,6 +616,8 @@ h2{
   font-size:1.15rem;
   margin-bottom:12px;
 }
+/* Mini preview thumbnail — the same photo used at the top of the full page,
+   shrunk down so the card hints at what's inside before it opens. */
 .card-thumb{
   display:block;
   width:100%;
@@ -648,18 +638,19 @@ h2{
   padding-bottom:1px;
 }
 .card.open-page:active{ transform:translateY(0); }
+/* Extra polish (icon pop, sliding arrow) stays specific to Work's project cards */
 .project-card:hover .card-icon{ background:var(--sea); transform:scale(1.08); }
 .project-card .card-icon{ transition:background 0.2s ease, transform 0.2s ease; }
 .project-card .card-link{ display:inline-flex; align-items:center; gap:4px; }
 .project-card .arrow{ display:inline-block; transition:transform 0.2s ease; }
 .project-card:hover .arrow{ transform:translateX(4px); }
 
-/* ---------- Modal ---------- */
+/* ---------- Page overlay (opened by any .openable card, or Email) ---------- */
 .modal-overlay{
   position:fixed;
   inset:0;
   background:rgba(243,233,212,0.84);
-  z-index:40;
+  z-index:40; /* under the header (50) so nav stays clickable while a page is open */
   display:flex;
   justify-content:center;
   opacity:0;
@@ -763,6 +754,9 @@ h2{
   color:var(--ink);
   margin-bottom:22px !important;
 }
+/* A little scrapbook-style accent: a rotated sticker/ribbon caption, similar
+   to the taped labels in the reference design — used sparingly under a
+   photo or headline in each page. */
 .modal .modal-tag{
   display:inline-block;
   background:var(--paper);
@@ -834,13 +828,17 @@ h2{
   margin:0;
   box-shadow:none;
 }
+/* "Hey, I'm Twisha" page: photo docked to the right, smaller, with the
+   copy flowing to its left instead of stacking on top. */
 .modal .about-photo-frame{
   float:right;
   width:180px;
   max-width:40%;
   margin:0 0 18px 22px;
 }
-.modal .about-photo-frame .prize-photo{ max-width:100%; }
+.modal .about-photo-frame .prize-photo{
+  max-width:100%;
+}
 .modal .signoff{ clear:both; }
 @media (max-width:640px){
   .modal .about-photo-frame{
@@ -851,6 +849,7 @@ h2{
   }
 }
 
+/* Small captioned photo used inside the Journey timeline */
 .journey-photo-frame{
   float:right;
   width:170px;
@@ -885,7 +884,12 @@ h2{
   transition:color 0.15s ease, border-color 0.15s ease;
 }
 .modal .project-live-link:hover{ color:var(--sea-deep); }
-.modal-tail{ margin-top:50px; opacity:0.85; }
+/* Beachy tail after the last paragraph of a page — gives the scroll
+   somewhere gentle to land instead of stopping dead on the last sentence. */
+.modal-tail{
+  margin-top:50px;
+  opacity:0.85;
+}
 .modal-tail .tail-wave{ width:100%; max-width:220px; }
 .modal-tail .tail-wave svg{ width:100%; display:block; }
 .modal-tail .tail-wave path{ fill:var(--sea); opacity:0.4; }
@@ -941,14 +945,14 @@ h2{
   color:var(--ink);
 }
 
-/* ---------- Decorative shell ---------- */
+/* ---------- Decorative shell (beach vibe, opposite corner from likes) ---------- */
 .shell-deco{
   position:fixed;
   left:22px;
   bottom:18px;
-  z-index:70;
-  width:42px;
-  height:42px;
+  z-index:70; /* keep the joke control clickable above the overlay and nav */
+  width:64px;
+  height:64px;
   opacity:0.95;
   cursor:pointer;
   background:none;
@@ -962,19 +966,26 @@ h2{
 .shell-deco:hover, .shell-deco:focus-visible{
   opacity:1;
   transform:translateY(-2px);
-  filter:drop-shadow(0 0 8px #ffb48a) drop-shadow(0 0 22px rgba(255,157,126,0.9)) brightness(1.08);
+  filter:drop-shadow(0 6px 16px rgba(217,122,99,0.45));
+  box-shadow:0 0 0 8px rgba(217,122,99,0.22), 0 0 26px 6px rgba(217,122,99,0.35);
 }
 .shell-deco:active{ opacity:0.85; }
 .shell-deco svg{ width:100%; height:100%; display:block; }
+/* Attention nudge — bounces a handful of times, repeating every 15s until
+   the shell has actually been clicked/opened once, then stops for good. */
 @keyframes shellNudge{
   0%, 100% { transform:translateY(0); }
   50% { transform:translateY(-14px); }
 }
-.shell-deco.nudge{ animation:shellNudge 0.35s ease-in-out 10; }
+.shell-deco.nudge{
+  animation:shellNudge 0.35s ease-in-out 10;
+}
+/* Small pill tooltip that appears above the shell on hover/focus, so it
+   reads as clickable before anyone actually clicks it. */
 .shell-tooltip{
   position:fixed;
   left:22px;
-  bottom:70px;
+  bottom:90px;
   z-index:70;
   background:var(--ink);
   color:var(--paper);
@@ -994,7 +1005,8 @@ h2{
   position:absolute;
   left:22px;
   bottom:-4px;
-  width:9px; height:9px;
+  width:9px;
+  height:9px;
   background:var(--ink);
   transform:rotate(45deg);
 }
@@ -1003,6 +1015,8 @@ h2{
   opacity:1;
   transform:translateY(0);
 }
+/* Hint shown inside the modal after a shell fact, nudging people to click
+   the shell again instead of leaving them to guess it cycles. */
 .modal .shell-hint{
   margin-top:14px;
   font-size:0.85rem;
@@ -1014,7 +1028,8 @@ h2{
 .email-wrap{ position:relative; display:inline-flex; }
 .copy-flag{
   position:absolute;
-  left:50%; top:100%;
+  left:50%;
+  top:100%;
   transform:translateX(-50%);
   margin-top:8px;
   white-space:nowrap;
@@ -1122,6 +1137,8 @@ footer#contact .links a:focus-visible{
   .journey-item{ flex-direction:column; gap:10px; }
 }
 
+/* Bigger boxes on laptop/desktop only for About, Journey and Work cards —
+   phone sizing above is untouched on purpose. */
 @media (min-width:861px){
   .cards .card{ padding:36px; border-radius:26px; }
   .cards .card h3{ font-size:1.32rem; }
@@ -1133,7 +1150,7 @@ footer#contact .links a:focus-visible{
   .hero-copy{ transition:none !important; transform:none !important; }
   .scroll-cue-arrow{ animation:none; }
 }
-
+/* Work projects sit in sandy hulls, with their sails above the deck. */
 #work .project-card{
   position:relative;
   isolation:isolate;
@@ -1160,8 +1177,10 @@ footer#contact .links a:focus-visible{
   content:'';
   position:absolute;
   z-index:0;
-  left:4%; right:4%;
-  top:140px; bottom:0;
+  left:4%;
+  right:4%;
+  top:140px;
+  bottom:0;
   background:
     repeating-linear-gradient(12deg, rgba(118,88,43,0.045) 0 1px, transparent 1px 6px),
     linear-gradient(160deg, #f5ebd5 0%, #e8d3a8 100%);
@@ -1172,8 +1191,10 @@ footer#contact .links a:focus-visible{
   content:'';
   position:absolute;
   z-index:1;
-  left:10%; right:10%;
-  top:140px; height:7px;
+  left:10%;
+  right:10%;
+  top:140px;
+  height:7px;
   border-radius:50%;
   background:#b48f56;
   pointer-events:none;
@@ -1182,7 +1203,10 @@ footer#contact .links a:focus-visible{
   position:relative;
   z-index:2;
 }
-#work .project-card h3{ margin:0 0 8px; color:var(--ink); }
+#work .project-card h3{
+  margin:0 0 8px;
+  color:var(--ink);
+}
 #work .project-card p,
 #work .project-card p em{
   margin:0;
@@ -1191,16 +1215,30 @@ footer#contact .links a:focus-visible{
 #work .ship-illustration{
   position:absolute;
   z-index:2;
-  top:0; left:50%;
-  width:100%; max-width:220px;
-  height:151px; margin:0;
+  top:0;
+  left:50%;
+  width:100%;
+  max-width:220px;
+  height:151px;
+  margin:0;
   transform:translateX(-50%);
   pointer-events:none;
 }
-#work .ship-mast{ top:4px; height:145px; }
-#work .ship-sail{ top:15px; width:62px; height:94px; }
+#work .ship-mast{
+  top:4px;
+  height:145px;
+}
+#work .ship-sail{
+  top:15px;
+  width:62px;
+  height:94px;
+}
 #work .ship-sail-main{ left:calc(50% - 60px); }
-#work .ship-sail-side{ top:35px; width:50px; height:74px; }
+#work .ship-sail-side{
+  top:35px;
+  width:50px;
+  height:74px;
+}
 #work .ship-flag{ top:0; }
 #work .card-icon{ display:none; }
 #work .project-card:hover,
@@ -1220,6 +1258,9 @@ footer#contact .links a:focus-visible{
   #work .project-card{ min-height:328px; padding:148px 30px 34px; }
 }
 
+
+
+/* ---------- About cards: scallop-shell illustration, one colour each ---------- */
 #about .cards{ filter:drop-shadow(0 14px 14px rgba(20,50,70,0.3)); gap:30px; grid-template-columns:repeat(2, minmax(0, 460px)); justify-content:center; }
 @media (max-width:900px){ #about .cards{ grid-template-columns:minmax(0, 460px); } }
 #about .card.open-page{
@@ -1229,7 +1270,8 @@ footer#contact .links a:focus-visible{
   overflow:visible;
   min-height:470px;
   padding:25% 19% 15%;
-  border:0; border-radius:0;
+  border:0;
+  border-radius:0;
   background:transparent;
   box-shadow:none;
   text-align:center;
@@ -1245,6 +1287,7 @@ footer#contact .links a:focus-visible{
   background:url('../assets/shell-card.png') center / 100% 100% no-repeat;
   pointer-events:none;
 }
+/* soft cream panel over the shell's ribs so the text stays easy to read */
 #about .card.open-page::after{
   content:'';
   position:absolute;
@@ -1254,6 +1297,7 @@ footer#contact .links a:focus-visible{
   pointer-events:none;
   display:block;
 }
+/* second shell: same illustration, recoloured (pink ribs on an aqua shell) */
 #about .card.open-page:nth-child(2)::before{ filter:hue-rotate(150deg) saturate(1.25); }
 #about .card h3{ color:var(--shell-ink); text-shadow:none; font-size:1.15rem; }
 #about .card p, #about .card p em{ color:var(--shell-ink) !important; opacity:0.9; font-size:0.92rem; line-height:1.5; margin:0 0 12px; }
@@ -1281,6 +1325,7 @@ footer#contact .links a:focus-visible{
   #about .card.open-page{ min-height:440px; padding:26% 17% 15%; }
 }
 
+/* Ship hulls: a little colour variety */
 #work .project-card:nth-child(2)::before{
   background:repeating-linear-gradient(12deg, rgba(40,90,100,0.05) 0 1px, transparent 1px 6px), linear-gradient(160deg, #e6f3ee 0%, #b9dccf 100%);
 }
@@ -1288,12 +1333,14 @@ footer#contact .links a:focus-visible{
   background:repeating-linear-gradient(12deg, rgba(120,60,40,0.05) 0 1px, transparent 1px 6px), linear-gradient(160deg, #fdebdc 0%, #f1bfa2 100%);
 }
 
+/* Nothing of the site is visible until the whirlpool has fully played out */
 header.nav, .likes, .shell-deco, .shell-tooltip{ transition:opacity 0.6s ease; }
 body.whirlpool-locked header.nav,
 body.whirlpool-locked .likes,
 body.whirlpool-locked .shell-deco,
 body.whirlpool-locked .shell-tooltip{ opacity:0; visibility:hidden; }
 
+/* ---------- Every text page / pop-up uses the beach wind-chime photo ---------- */
 .modal-overlay,
 .modal-overlay.photo-backdrop,
 .modal-overlay.about-backdrop{
@@ -1306,6 +1353,7 @@ body.whirlpool-locked .shell-tooltip{ opacity:0; visibility:hidden; }
   background-attachment:fixed;
 }
 
+/* ---------- Hero greeting: clean font, frosted card, warm accent ---------- */
 .hero-card{
   max-width:min(92vw, 800px);
   padding:clamp(24px,4vw,40px) clamp(22px,5vw,52px);
@@ -1355,6 +1403,7 @@ body.whirlpool-locked .shell-tooltip{ opacity:0; visibility:hidden; }
   text-shadow:0 1px 8px rgba(0,0,0,0.5);
 }
 
+/* ---------- Hover: things light up in their own colour ---------- */
 #about .card.open-page{ --glow:#ffd27a; --glow-soft:rgba(255,210,122,0.75); }
 #about .card.open-page:nth-child(2){ --glow:#4fd6ff; --glow-soft:rgba(79,214,255,0.75); }
 #about .card.open-page:hover,
@@ -1384,6 +1433,7 @@ body.whirlpool-locked .shell-tooltip{ opacity:0; visibility:hidden; }
   box-shadow:0 0 0 2px rgba(255,157,126,0.6), 0 0 28px rgba(255,157,126,0.6), 0 12px 26px rgba(217,122,99,0.3);
 }
 
+/* ---------- Work cards: cream by default, turn ocean blue on hover / click ---------- */
 #work .project-card h3, #work .project-card p, #work .project-card p em{ transition:color 0.25s ease; }
 #work .project-card:hover::before,
 #work .project-card:focus-visible::before,
