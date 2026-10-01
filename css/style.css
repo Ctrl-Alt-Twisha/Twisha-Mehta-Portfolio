@@ -951,8 +951,8 @@ h2{
   left:22px;
   bottom:18px;
   z-index:70; /* keep the joke control clickable above the overlay and nav */
-  width:64px;
-  height:64px;
+  width:58px;
+  height:58px;
   opacity:0.95;
   cursor:pointer;
   background:none;
