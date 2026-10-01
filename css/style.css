@@ -182,27 +182,37 @@ body.whirlpool-locked .shell-tooltip{ pointer-events:none; }
   pointer-events:none;
   transition:opacity 0.4s ease;
 }
+/* ---------- Force Scroll Indicator Visibility ---------- */
 .scroll-cue {
-  position: fixed;
-  z-index: 100;           /* High z-index keeps it above hero background & canvas */
-  left: 50%;
-  bottom: 30px;
-  transform: translateX(-50%);
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  gap: 6px;
-  color: #ffffff;         /* Solid white for maximum contrast */
-  font-family: 'Inter', sans-serif;
-  font-weight: 600;
-  font-size: 0.75rem;
-  letter-spacing: 0.15em;
-  text-shadow: 0 2px 10px rgba(0, 0, 0, 0.8);
-  pointer-events: none;
-  opacity: 1 !important;   /* Force visible on load */
+  position: fixed !important;
+  bottom: 28px !important;
+  left: 50% !important;
+  transform: translateX(-50%) !important;
+  z-index: 9999 !important; /* Forces it above canvas, stage, and overlays */
+  display: flex !important;
+  flex-direction: column !important;
+  align-items: center !important;
+  gap: 6px !important;
+  color: #ffffff !important;
+  font-family: 'Inter', sans-serif !important;
+  font-size: 0.75rem !important;
+  font-weight: 700 !important;
+  letter-spacing: 0.18em !important;
+  text-shadow: 0 2px 10px rgba(0, 0, 0, 0.9) !important;
+  opacity: 1 !important;
   visibility: visible !important;
+  pointer-events: none !important;
 }
 
+.scroll-cue-arrow {
+  font-size: 1.4rem !important;
+  line-height: 1 !important;
+  animation: cueFloat 1.6s ease-in-out infinite !important;
+}
+
+@keyframes cueFloat {
+  50% { transform: translateY(6px); }
+}
 .scroll-cue-arrow {
   font-size: 1.35rem;
   line-height: 1;
