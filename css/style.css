@@ -1,0 +1,1461 @@
+:root{
+  color-scheme: light;
+  --sea:#7fb3c4;
+  --sea-deep:#4f92a8;
+  --sand:#f3e9d4;
+  --sand-deep:#e3c99b;
+  --sand-line:#d8c19a;
+  --ink:#3a2f22;
+  --ink-soft:#6b5c46;
+  --coral:#d97a63;
+  --paper:#f1e4c9;
+}
+/* Keep the beach palette even if a viewer's OS/browser is set to dark mode —
+   this page is designed as one light, sunny theme and should never flip to
+   a mismatched dark scheme that leaves text unreadable. */
+@media (prefers-color-scheme: dark){
+  :root:not([data-theme="light"]){
+    --sea:#7fb3c4; --sea-deep:#4f92a8; --sand:#f3e9d4; --sand-deep:#e3c99b;
+    --sand-line:#d8c19a; --ink:#3a2f22; --ink-soft:#6b5c46; --coral:#d97a63; --paper:#f1e4c9;
+  }
+}
+:root[data-theme="dark"]{
+  --sea:#7fb3c4; --sea-deep:#4f92a8; --sand:#f3e9d4; --sand-deep:#e3c99b;
+  --sand-line:#d8c19a; --ink:#3a2f22; --ink-soft:#6b5c46; --coral:#d97a63; --paper:#f1e4c9;
+}
+*{ box-sizing:border-box; }
+html{ scroll-behavior:smooth; }
+html,body{
+  margin:0; padding:0; width:100%;
+  background:var(--sand);
+  font-family:'Inter',sans-serif;
+  color:var(--ink);
+}
+img{ max-width:100%; display:block; }
+
+/* ---------- Nav ---------- */
+header.nav{
+  position:fixed;
+  top:0; left:0; right:0;
+  z-index:50;
+  display:flex;
+  align-items:center;
+  justify-content:space-between;
+  padding:20px clamp(20px, 5vw, 48px);
+  background:rgba(250,245,233,0.0);
+  transition:background 0.4s ease, box-shadow 0.4s ease;
+}
+header.nav.scrolled,
+header.nav.solid{
+  background:rgba(241,228,201,0.94);
+  backdrop-filter:blur(8px);
+  box-shadow:0 1px 0 var(--sand-line);
+}
+header.nav .name{
+  font-family:'Quicksand',sans-serif;
+  font-weight:700;
+  font-size:1.05rem;
+  color:var(--ink);
+  text-decoration:none;
+  text-shadow:0 2px 10px rgba(250,245,233,0.45);
+  padding:6px 10px;
+  margin:-6px -10px;
+  border-radius:999px;
+  transition:background 0.2s ease, opacity 0.2s ease;
+}
+header.nav .name:hover,
+header.nav .name:focus-visible{
+  background:rgba(127,179,196,0.22);
+}
+header.nav nav{
+  display:flex;
+  gap:clamp(16px, 3vw, 32px);
+}
+header.nav nav a{
+  font-family:'Inter',sans-serif;
+  font-weight:500;
+  font-size:0.92rem;
+  color:var(--ink);
+  text-decoration:none;
+  opacity:0.85;
+  text-shadow:0 2px 10px rgba(250,245,233,0.45);
+  transition:opacity 0.2s ease, background 0.2s ease;
+  padding:6px 12px;
+  margin:-6px -12px;
+  border-radius:999px;
+}
+header.nav nav a:hover,
+header.nav nav a:focus-visible{ opacity:1; background:rgba(127,179,196,0.22); }
+header.nav nav a.active{ opacity:1; border-bottom:2px solid var(--ink); padding-bottom:2px; }
+header.nav nav button.nav-link{
+  font-family:'Inter',sans-serif;
+  font-weight:500;
+  font-size:0.92rem;
+  color:var(--ink);
+  background:none;
+  border:none;
+  cursor:pointer;
+  opacity:0.85;
+  text-shadow:0 2px 10px rgba(250,245,233,0.45);
+  transition:opacity 0.2s ease, background 0.2s ease;
+  padding:6px 12px;
+  margin:-6px -12px;
+  border-radius:999px;
+}
+header.nav nav button.nav-link:hover,
+header.nav nav button.nav-link:focus-visible{ opacity:1; background:rgba(127,179,196,0.22); }
+
+/* ---------- Puzzle hero ---------- */
+#stage.whirlpool-stage{
+  position:sticky;
+  top:0;
+  width:100%;
+  height:100svh;
+  overflow:hidden;
+  isolation:isolate;
+  background:#06212a url('../assets/whirlpool-ocean.jpg') center / cover no-repeat;
+}
+#whirlpoolCanvas{ position:absolute; inset:0; width:100%; height:100%; display:block; }
+.whirlpool-runway{ position:relative; height:270svh; background:#06212a; }
+body.whirlpool-locked header.nav,
+body.whirlpool-locked .portfolio-start,
+body.whirlpool-locked main,
+body.whirlpool-locked .likes,
+body.whirlpool-locked .shell-deco,
+body.whirlpool-locked .shell-tooltip{ pointer-events:none; }
+#stage::after{
+  content:'';
+  position:absolute;
+  inset:0;
+  z-index:1;
+  background:linear-gradient(180deg,rgba(2,18,25,0.16),rgba(2,18,25,0.08) 46%,rgba(2,18,25,0.34));
+  pointer-events:none;
+}
+.hero-copy{
+  position:absolute;
+  inset:0;
+  /* Higher than every .piece (they go up to ~11) so the assembled puzzle
+     tiles don't paint over the greeting — but still LOWER than the modal
+     overlay (40), so opening any page (About, a project, the shell joke)
+     while still on the hero correctly hides this text instead of leaving
+     it floating on top of the overlay. */
+  z-index:2;
+  display:flex;
+  flex-direction:column;
+  align-items:center;
+  justify-content:center;
+  text-align:center;
+  pointer-events:none;
+  opacity:0;
+  transform:translateY(14px);
+  transition:opacity 1.1s ease, transform 1.1s ease;
+  padding:0 24px;
+}
+.hero-copy.show{ opacity:1; transform:translateY(0); }
+.hero-copy .greeting{
+  font-family:'Quicksand',sans-serif;
+  font-weight:700;
+  font-size:clamp(2.1rem, 6vw, 4.2rem);
+  color:#fff;
+  margin:0 0 10px 0;
+  text-shadow:0 3px 22px rgba(0,0,0,0.72),0 1px 3px rgba(0,0,0,0.9);
+}
+.hero-copy .role{
+  font-family:'Inter',sans-serif;
+  font-weight:500;
+  font-size:clamp(1rem, 2.4vw, 1.35rem);
+  color:rgba(255,255,255,0.94);
+  margin:0 0 26px 0;
+  max-width:40ch;
+  text-shadow:0 2px 18px rgba(0,0,0,0.9);
+}
+.scroll-cue{
+  position:absolute;
+  z-index:3;
+  left:50%;
+  bottom:30px;
+  display:flex;
+  flex-direction:column;
+  align-items:center;
+  gap:7px;
+  transform:translateX(-50%);
+  color:rgba(255,255,255,0.86);
+  font:600 0.68rem 'Inter',sans-serif;
+  letter-spacing:0.14em;
+  text-shadow:0 2px 8px rgba(0,0,0,0.65);
+  pointer-events:none;
+}
+.scroll-cue-arrow{ font-size:1.35rem; line-height:1; animation:cueFloat 1.6s ease-in-out infinite; }
+@keyframes cueFloat{ 50%{ transform:translateY(6px); } }
+.whirlpool-fallback{ background-position:center; background-size:cover; }
+.portfolio-start{
+  display:flex;
+  align-items:center;
+  min-height:66svh;
+  padding:90px 0;
+  background:linear-gradient(135deg,#e7d2aa,#f3e9d4 55%,#e3c99b);
+}
+.portfolio-start .wrap{ max-width:960px; }
+.start-kicker{ margin:0 0 16px; color:var(--coral); font:700 0.78rem 'Inter',sans-serif; }
+.portfolio-start h1{ margin:0 0 18px; color:var(--ink); font:700 clamp(2.5rem,6vw,4.5rem)/1.04 'Quicksand',sans-serif; }
+.portfolio-start p:not(.start-kicker){ max-width:52ch; margin:0 0 28px; color:var(--ink-soft); font-size:1.1rem; line-height:1.65; }
+.start-link{ display:inline-flex; align-items:center; gap:12px; color:var(--ink); text-decoration:none; font-weight:700; border-bottom:2px solid var(--coral); padding:0 0 7px; }
+.start-link span{ font-size:1.2rem; }
+
+/* ---------- Sections below the fold ---------- */
+main{ background:var(--sand); }
+.wrap{
+  max-width:960px;
+  margin:0 auto;
+  padding:0 clamp(20px, 5vw, 48px);
+}
+
+.page-hero{
+  padding:150px 0 40px 0;
+}
+.page-hero h1{
+  font-family:'Quicksand',sans-serif;
+  font-weight:700;
+  font-size:clamp(2rem, 5vw, 3rem);
+  margin:0 0 10px 0;
+}
+.page-hero p.lede{
+  font-size:1.1rem;
+  color:var(--ink-soft);
+  max-width:60ch;
+  line-height:1.6;
+}
+
+.stats{
+  padding:56px 0;
+  border-bottom:1px solid var(--sand-line);
+  border-top:1px solid var(--sand-line);
+}
+.stats .wrap{
+  display:flex;
+  flex-wrap:wrap;
+  gap:28px 48px;
+  justify-content:center;
+}
+.stat{
+  text-align:center;
+  padding:10px 22px;
+  border-radius:16px;
+  transition:background 0.2s ease, box-shadow 0.2s ease, transform 0.2s ease;
+}
+.stat:hover{
+  background:transparent;
+  box-shadow:none;
+  transform:none;
+}
+.stat a{ text-decoration:none; color:inherit; display:block; }
+.stat button.open-page{
+  display:block;
+  width:100%;
+  background:none;
+  border:none;
+  appearance:none;
+  -webkit-appearance:none;
+  padding:0;
+  margin:0;
+  font-family:inherit;
+  color:inherit;
+  cursor:pointer;
+  text-align:inherit;
+}
+.stat button.open-page:focus-visible{
+  outline:2px solid var(--sea-deep);
+  outline-offset:6px;
+  border-radius:8px;
+}
+.stat-thumb{
+  width:86px;
+  height:72px;
+  object-fit:contain;
+  margin-bottom:8px;
+}
+.stat .num{
+  font-family:'Quicksand',sans-serif;
+  font-weight:700;
+  font-size:1.7rem;
+  color:var(--ink);
+  display:inline-flex;
+  align-items:center;
+  gap:6px;
+  text-decoration:none;
+}
+.stat .label{
+  font-size:0.88rem;
+  color:var(--ink-soft);
+  margin-top:2px;
+}
+/* Prize / LeetCode "boxes" — a visible card so it reads as clickable,
+   with a warm hover glow instead of the old underline-on-hover. Bigger
+   size is desktop-only (see media query below); phones keep this base size. */
+.stat-box{
+  display:flex !important;
+  flex-direction:column;
+  align-items:center;
+  justify-content:center;
+  width:210px !important;
+  border-radius:18px !important;
+  border:1px solid var(--sand-line) !important;
+  background:var(--paper) !important;
+  padding:14px 22px !important;
+  text-decoration:none !important;
+  transition:box-shadow 0.25s ease, border-color 0.25s ease, transform 0.2s ease;
+}
+.stat-box:hover, .stat-box:focus-visible{
+  border-color:var(--coral);
+  box-shadow:0 0 0 1px rgba(217,122,99,0.35), 0 12px 26px rgba(217,122,99,0.25);
+  transform:translateY(-3px);
+}
+.stat-box:active{ transform:translateY(-1px); }
+.stat-box .num, .stat-box .label{ text-decoration:none !important; }
+.amount-black{
+  color:#1c1a17;
+  font-weight:800;
+}
+@media (min-width:861px){
+  .stat-box{ width:280px !important; padding:22px 36px !important; }
+  .stat-box .num{ font-size:2.15rem; white-space:nowrap; }
+  .stat-box .label{ font-size:1.02rem; }
+}
+
+section{ padding:88px 0; scroll-margin-top:34px; }
+/* Extra breathing room right after the puzzle, and again before Work,
+   so About doesn't feel like it starts the instant you stop scrolling. */
+#about{
+  position:relative;
+  padding:clamp(92px, 12vh, 145px) 0 145px 0;
+  background:linear-gradient(180deg, var(--sand) 0%, #ecdfc0 100%);
+  overflow:hidden;
+}
+/* A bit more room to scroll through, and a small gap so jumping here
+   from the nav doesn't land flush against the header. */
+#work{
+  position:relative;
+  padding:135px 0 115px 0;
+  scroll-margin-top:44px;
+  /* Deep lagoon teal instead of flat navy: still dark, but with a soft
+     sea-glow up top and a faint sunset-coral glow low down so it feels
+     warm and inviting rather than heavy. */
+  background:
+    radial-gradient(ellipse 65% 55% at 15% 8%, rgba(127,179,196,0.20), transparent 70%),
+    radial-gradient(ellipse 55% 45% at 92% 96%, rgba(217,122,99,0.16), transparent 70%),
+    linear-gradient(180deg, #0f3640 0%, #0f2f3f 55%, #122a3d 100%);
+}
+/* Shoreline: the sandy-grey wave at the bottom of About flows into the
+   dark water here, so there's no hard cut between the two sections. */
+#work::before{
+  content:'';
+  position:absolute; top:0; left:0; right:0; height:60px;
+  background:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 1200 60' preserveAspectRatio='none'%3E%3Cpath fill='%23c6d0c1' d='M0,0 L1200,0 L1200,30 C1050,60 850,0 600,30 C350,60 150,0 0,30 Z'/%3E%3C/svg%3E") center top / 100% 100% no-repeat;
+  pointer-events:none;
+}
+#work h2{ color:var(--paper); }
+#work .card{
+  position:relative;
+  isolation:isolate;
+  display:flex;
+  flex-direction:column;
+  align-items:center;
+  min-height:290px;
+  padding:22px 24px 58px;
+  overflow:visible;
+  text-align:center;
+  color:var(--ink);
+  background:
+    repeating-linear-gradient(12deg, rgba(118,88,43,0.035) 0 1px, transparent 1px 6px),
+    linear-gradient(160deg, #f5ebd5 0%, #e8d3a8 100%);
+  border:1px solid #c6a96f;
+  border-radius:18px 18px 48% 48% / 18px 18px 24% 24%;
+  box-shadow:0 12px 24px rgba(4,16,24,0.3);
+  transition:transform 0.22s ease, box-shadow 0.22s ease, background 0.22s ease;
+}
+#work .card.open-page{ clip-path:polygon(0 0,100% 0,100% 76%,88% 90%,72% 100%,28% 100%,12% 90%,0 76%); }
+#work .ship-illustration{
+  position:relative;
+  display:block;
+  flex:0 0 112px;
+  width:100%;
+  max-width:220px;
+  margin:0 auto 10px;
+}
+#work .ship-mast{
+  position:absolute;
+  left:50%;
+  top:8px;
+  width:4px;
+  height:82px;
+  border-radius:4px;
+  background:#815f38;
+  transform:translateX(-50%);
+}
+#work .ship-sail{
+  position:absolute;
+  top:18px;
+  width:52px;
+  height:60px;
+  background:#fff0ce;
+  border:1px solid #c6a96f;
+  filter:drop-shadow(0 3px 2px rgba(58,47,34,0.12));
+}
+#work .ship-sail-main{
+  left:calc(50% - 50px);
+  clip-path:polygon(100% 0,100% 100%,0 100%);
+}
+#work .ship-sail-side{
+  left:50%;
+  top:30px;
+  width:42px;
+  height:48px;
+  background:#d9846d;
+  clip-path:polygon(0 0,100% 100%,0 100%);
+}
+#work .ship-flag{
+  position:absolute;
+  left:calc(50% + 4px);
+  top:5px;
+  font-size:1.15rem;
+  line-height:1;
+}
+#work .card-icon{ display:none; }
+#work .card h3{ color:var(--ink); margin:0 0 8px; }
+#work .card p, #work .card p em{ color:var(--ink-soft) !important; margin-bottom:0; }
+#work .card.open-page:hover,
+#work .card.open-page:focus-visible{
+  background:
+    repeating-linear-gradient(12deg, rgba(118,88,43,0.04) 0 1px, transparent 1px 6px),
+    linear-gradient(160deg, #f8efd9 0%, #eddbb7 100%);
+  border-color:#b48f56;
+  box-shadow:0 0 0 2px rgba(227,201,155,0.55), 0 18px 30px rgba(4,16,24,0.36);
+  transform:translateY(-5px);
+  outline:none;
+}
+#work .project-card:hover .card-icon{ background:#f0a08a; }
+#work .card a{ color:var(--paper); border-bottom-color:var(--sea); }
+
+/* ---------- About cards: light blue → deep blue so they read as buttons ---------- */
+#about .card.open-page{
+  display:flex;
+  flex-direction:column;
+  align-items:stretch;
+  background:linear-gradient(165deg, #9ad0e3 0%, #4f97b8 30%, #25607f 62%, #1b3d5b 100%);
+  border:1px solid rgba(255,255,255,0.5);
+  box-shadow:0 10px 24px rgba(29,58,84,0.28);
+}
+#about .card h3{ color:#fff; text-shadow:0 1px 3px rgba(10,30,50,0.35); }
+#about .card p, #about .card p em{ color:#e6f2f7 !important; }
+#about .card-thumb{
+  background:rgba(241,228,201,0.92);
+  border-color:rgba(241,228,201,0.75);
+  box-shadow:0 6px 14px rgba(15,40,60,0.25);
+}
+/* Emoji strip standing in for a photo on the Journey card (mirrors the
+   five chapters inside it) so both cards have the same shape. */
+.card-thumb-emoji{
+  display:flex;
+  align-items:center;
+  justify-content:center;
+  flex-wrap:wrap;
+  align-content:center;
+  gap:8px 8px;
+  font-size:1.6rem;
+  line-height:1;
+}
+/* The "Read more" pill — an actual button-looking thing at the bottom of each card */
+.card-cta{
+  margin-top:auto;
+  align-self:center;
+  display:inline-flex;
+  align-items:center;
+  gap:8px;
+  font-family:'Quicksand',sans-serif;
+  font-weight:700;
+  font-size:0.92rem;
+  color:#1b3d5b;
+  background:#e3c99b;
+  padding:10px 20px;
+  border-radius:999px;
+  box-shadow:0 4px 10px rgba(10,30,50,0.25);
+  transition:background 0.2s ease, transform 0.2s ease;
+}
+.card-cta .arrow{ display:inline-block; transition:transform 0.2s ease; }
+#about .card.open-page:hover,
+#about .card.open-page:focus-visible{
+  border-color:#dff2fa;
+  box-shadow:0 0 0 3px rgba(154,208,227,0.6), 0 18px 38px rgba(29,58,84,0.42);
+  transform:translateY(-4px);
+  filter:brightness(1.07);
+  outline:none;
+}
+#about .card.open-page:hover .card-cta,
+#about .card.open-page:focus-visible .card-cta{ background:#e3c99b; }
+#about .card.open-page:hover .arrow,
+#about .card.open-page:focus-visible .arrow{ transform:translateX(5px); }
+
+/* ---------- Journey So Far (modal opened from an About card) ---------- */
+.modal .journey-timeline{
+  display:flex;
+  flex-direction:column;
+  gap:16px;
+  margin:0 0 28px 0;
+}
+.modal .journey-item{
+  display:flex;
+  gap:14px;
+  align-items:flex-start;
+}
+.modal .journey-item > div{ overflow:auto; }
+.modal .journey-icon{
+  flex:0 0 auto;
+  display:inline-flex;
+  align-items:center;
+  justify-content:center;
+  width:38px; height:38px;
+  border-radius:50%;
+  background:var(--sand-deep);
+  font-size:1.1rem;
+  margin-top:2px;
+}
+.modal .journey-item h3{
+  font-family:'Quicksand',sans-serif;
+  font-weight:600;
+  font-size:1rem;
+  margin:0 0 4px 0;
+  color:var(--ink);
+}
+.modal .journey-item p{
+  font-size:0.92rem;
+  line-height:1.55;
+  color:var(--ink-soft);
+  margin:0 0 8px 0;
+  max-width:56ch;
+}
+.modal .journey-item p:last-child{ margin-bottom:0; }
+.resume-btn{
+  display:inline-flex;
+  align-items:center;
+  gap:8px;
+  font-family:'Quicksand',sans-serif;
+  font-weight:600;
+  font-size:0.9rem;
+  color:var(--ink);
+  background:var(--sand-deep);
+  border:1px solid var(--sand-line);
+  border-radius:999px;
+  padding:11px 22px;
+  text-decoration:none;
+  transition:background 0.2s ease, transform 0.2s ease;
+}
+.resume-btn:hover{
+  background:var(--sea);
+  color:var(--paper);
+  transform:translateY(-2px);
+}
+.resume-actions{
+  display:flex;
+  flex-wrap:wrap;
+  gap:12px;
+  margin-top:6px;
+}
+/* Beachy wave dividers that frame the About section top/bottom */
+.wave-top, .wave-bottom{
+  position:absolute; left:0; right:0; width:100%; height:60px; line-height:0;
+}
+.wave-top{ top:0; }
+.wave-bottom{ bottom:0; }
+.wave-top svg, .wave-bottom svg{ width:100%; height:60px; display:block; }
+.wave-top path{ fill:var(--sea); opacity:0.35; }
+.wave-bottom path{ fill:var(--sea); opacity:0.35; }
+h2{
+  font-family:'Quicksand',sans-serif;
+  font-weight:700;
+  font-size:clamp(1.6rem, 3.2vw, 2.2rem);
+  margin:0 0 34px 0;
+  color:var(--ink);
+  display:flex;
+  align-items:center;
+  gap:10px;
+}
+.h2-deco{ font-size:0.85em; filter:drop-shadow(0 2px 4px rgba(40,28,10,0.15)); }
+
+.cards{
+  display:grid;
+  grid-template-columns:repeat(3, 1fr);
+  gap:22px;
+  margin-top:8px;
+}
+.card{
+  background:var(--paper);
+  border:1px solid var(--sand-line);
+  border-radius:22px;
+  padding:26px;
+}
+.card h3{
+  font-family:'Quicksand',sans-serif;
+  font-weight:600;
+  font-size:1.1rem;
+  margin:0 0 8px 0;
+  color:var(--ink);
+}
+.card p, .card p em{
+  font-size:0.95rem;
+  line-height:1.55;
+  color:var(--ink-soft) !important;
+  margin:0 0 16px 0;
+}
+.card-icon{
+  display:inline-flex;
+  align-items:center;
+  justify-content:center;
+  width:38px; height:38px;
+  border-radius:50%;
+  background:var(--sand-deep);
+  font-size:1.15rem;
+  margin-bottom:12px;
+}
+/* Mini preview thumbnail — the same photo used at the top of the full page,
+   shrunk down so the card hints at what's inside before it opens. */
+.card-thumb{
+  display:block;
+  width:100%;
+  height:190px;
+  object-fit:contain;
+  object-position:center;
+  background:var(--paper);
+  border-radius:14px;
+  border:1px solid var(--sand-line);
+  margin-bottom:14px;
+}
+.card a{
+  font-size:0.9rem;
+  font-weight:600;
+  color:var(--ink);
+  text-decoration:none;
+  border-bottom:1px solid var(--sand-deep);
+  padding-bottom:1px;
+}
+.card.open-page:active{ transform:translateY(0); }
+/* Extra polish (icon pop, sliding arrow) stays specific to Work's project cards */
+.project-card:hover .card-icon{ background:var(--sea); transform:scale(1.08); }
+.project-card .card-icon{ transition:background 0.2s ease, transform 0.2s ease; }
+.project-card .card-link{ display:inline-flex; align-items:center; gap:4px; }
+.project-card .arrow{ display:inline-block; transition:transform 0.2s ease; }
+.project-card:hover .arrow{ transform:translateX(4px); }
+
+/* ---------- Page overlay (opened by any .openable card, or Email) ---------- */
+.modal-overlay{
+  position:fixed;
+  inset:0;
+  background:rgba(243,233,212,0.84);
+  z-index:40; /* under the header (50) so nav stays clickable while a page is open */
+  display:flex;
+  justify-content:center;
+  opacity:0;
+  pointer-events:none;
+  transition:opacity 0.25s ease;
+  overflow-y:auto;
+  -webkit-backdrop-filter:blur(8px);
+  backdrop-filter:blur(8px);
+}
+.modal-overlay.show{ opacity:1; pointer-events:auto; }
+.modal-overlay.about-backdrop{
+  background-color:rgba(243,233,212,0.9);
+  background-image:
+    linear-gradient(rgba(243,233,212,0.8),rgba(243,233,212,0.9)),
+    url("../assets/whirlpool-ocean.jpg");
+  background-size:cover;
+  background-position:center;
+  background-attachment:fixed;
+}
+.modal-overlay.photo-backdrop{
+  background-color:rgba(243,233,212,0.9);
+  background-image:
+    linear-gradient(rgba(243,233,212,0.68),rgba(243,233,212,0.8)),
+    url("../assets/hero.jpg");
+  background-size:cover;
+  background-position:center;
+  background-attachment:fixed;
+}
+.modal-watermark{
+  position:fixed;
+  top:10vh;
+  right:clamp(22px, 8vw, 120px);
+  z-index:0;
+  font-size:5rem;
+  line-height:1;
+  opacity:0.16;
+  filter:blur(1px);
+  transform:rotate(-12deg);
+  pointer-events:none;
+  user-select:none;
+}
+.modal{
+  width:100%;
+  max-width:720px;
+  padding:170px clamp(20px, 5vw, 48px) 45vh;
+  position:relative;
+  z-index:1;
+  min-height:100vh;
+}
+.modal-back{
+  display:inline-flex;
+  align-items:center;
+  gap:6px;
+  background:none;
+  border:none;
+  font-family:'Inter',sans-serif;
+  font-weight:600;
+  font-size:0.92rem;
+  color:var(--ink-soft);
+  cursor:pointer;
+  padding:0;
+  margin-bottom:28px;
+  transition:color 0.15s ease;
+}
+.modal-back:hover{ color:var(--ink); }
+.modal h3{
+  font-family:'Quicksand',sans-serif;
+  font-weight:700;
+  font-size:clamp(1.6rem, 4vw, 2.2rem);
+  margin:0 0 16px 0;
+  color:var(--ink);
+}
+.modal p{
+  font-size:1.05rem;
+  line-height:1.7;
+  color:var(--ink-soft);
+  margin:0 0 20px 0;
+  max-width:60ch;
+}
+.modal p:last-child{ margin-bottom:0; }
+.modal #modalBody{
+  font-size:1.05rem;
+  line-height:1.7;
+  color:var(--ink-soft);
+  max-width:60ch;
+}
+.modal .signoff{
+  color:var(--ink);
+  margin-top:28px;
+}
+.modal .signoff-author{
+  display:inline-block;
+  margin-top:8px;
+  font-style:normal;
+  font-weight:600;
+  font-size:0.92em;
+  color:var(--ink-soft);
+}
+.modal .tagline{
+  font-size:1.2rem;
+  color:var(--ink);
+  margin-bottom:22px !important;
+}
+/* A little scrapbook-style accent: a rotated sticker/ribbon caption, similar
+   to the taped labels in the reference design — used sparingly under a
+   photo or headline in each page. */
+.modal .modal-tag{
+  display:inline-block;
+  background:var(--paper);
+  border:1px solid var(--sand-line);
+  border-left:4px solid var(--coral);
+  border-radius:6px;
+  padding:8px 16px;
+  font-family:'Quicksand',sans-serif;
+  font-weight:600;
+  font-size:0.85rem;
+  color:var(--ink);
+  transform:rotate(-1.4deg);
+  box-shadow:0 6px 14px rgba(40,28,10,0.14);
+  margin:0 0 22px 0;
+}
+.modal .built-with{ margin-top:26px; }
+.modal .built-label{
+  display:block;
+  font-family:'Inter',sans-serif;
+  font-weight:600;
+  font-size:0.8rem;
+  text-transform:uppercase;
+  letter-spacing:0.06em;
+  color:var(--ink-soft);
+  margin-bottom:10px;
+}
+.modal .project-badge{
+  display:inline-block;
+  margin-top:26px;
+  font-family:'Menlo','Consolas',monospace;
+  font-size:0.85rem;
+  background:var(--sand-deep);
+  color:var(--ink);
+  padding:7px 16px;
+  border-radius:10px;
+}
+.modal .photo-frame{
+  position:relative;
+  display:inline-block;
+  background:var(--paper);
+  padding:12px 12px 22px 12px;
+  border:1px solid var(--sand-line);
+  border-radius:8px;
+  box-shadow:0 16px 32px rgba(40,28,10,0.24);
+  transform:rotate(-3.5deg);
+  transition:transform 0.3s ease, box-shadow 0.3s ease;
+  margin:2px 0 26px 0;
+}
+.modal .photo-frame:hover{
+  transform:rotate(0deg) translateY(-2px);
+  box-shadow:0 20px 38px rgba(40,28,10,0.28);
+}
+.modal .photo-tape{
+  position:absolute;
+  top:-14px;
+  left:50%;
+  width:92px;
+  height:28px;
+  transform:translateX(-50%) rotate(-3deg);
+  background:rgba(241,228,201,0.72);
+  border:1px solid rgba(241,228,201,0.84);
+  box-shadow:0 3px 8px rgba(40,28,10,0.18);
+}
+.modal .prize-photo{
+  display:block;
+  width:100%;
+  max-width:480px;
+  border-radius:4px;
+  margin:0;
+  box-shadow:none;
+}
+/* "Hey, I'm Twisha" page: photo docked to the right, smaller, with the
+   copy flowing to its left instead of stacking on top. */
+.modal .about-photo-frame{
+  float:right;
+  width:180px;
+  max-width:40%;
+  margin:0 0 18px 22px;
+}
+.modal .about-photo-frame .prize-photo{
+  max-width:100%;
+}
+.modal .signoff{ clear:both; }
+@media (max-width:640px){
+  .modal .about-photo-frame{
+    float:none;
+    width:150px;
+    max-width:60%;
+    margin:0 auto 20px auto;
+  }
+}
+
+/* Small captioned photo used inside the Journey timeline */
+.journey-photo-frame{
+  float:right;
+  width:170px;
+  max-width:45%;
+  margin:2px 0 14px 18px;
+}
+.journey-photo-frame .prize-photo{ max-width:100%; }
+.journey-photo-caption{
+  display:block;
+  text-align:center;
+  font-family:'Quicksand',sans-serif;
+  font-weight:600;
+  font-size:0.78rem;
+  color:var(--ink-soft);
+  margin-top:6px;
+  font-style:italic;
+}
+@media (max-width:640px){
+  .journey-photo-frame{ float:none; width:160px; max-width:65%; margin:10px auto 14px auto; }
+}
+.modal .project-live-link{
+  display:inline-block;
+  margin-top:18px;
+  margin-left:10px;
+  font-family:'Inter',sans-serif;
+  font-weight:600;
+  font-size:0.9rem;
+  color:var(--ink);
+  text-decoration:none;
+  border-bottom:1px solid var(--sea-deep);
+  padding-bottom:2px;
+  transition:color 0.15s ease, border-color 0.15s ease;
+}
+.modal .project-live-link:hover{ color:var(--sea-deep); }
+/* Beachy tail after the last paragraph of a page — gives the scroll
+   somewhere gentle to land instead of stopping dead on the last sentence. */
+.modal-tail{
+  margin-top:50px;
+  opacity:0.85;
+}
+.modal-tail .tail-wave{ width:100%; max-width:220px; }
+.modal-tail .tail-wave svg{ width:100%; display:block; }
+.modal-tail .tail-wave path{ fill:var(--sea); opacity:0.4; }
+.modal-tail .tail-shell{
+  display:inline-block;
+  margin-top:14px;
+  font-size:1.4rem;
+  transform:rotate(-6deg);
+}
+.modal .modal-email{
+  display:inline-block;
+  margin-top:22px;
+  font-family:'Quicksand',sans-serif;
+  font-weight:700;
+  font-size:1.15rem;
+  color:var(--ink);
+  text-decoration:none;
+  border-bottom:2px solid var(--sand-deep);
+  padding-bottom:2px;
+}
+
+/* ---------- Likes counter ---------- */
+.likes{
+  position:fixed;
+  right:22px;
+  bottom:22px;
+  z-index:60;
+  display:flex;
+  align-items:center;
+  justify-content:space-between;
+  gap:10px;
+  min-width:92px;
+  height:50px;
+  box-sizing:border-box;
+  background:var(--paper);
+  border:1px solid var(--sand-line);
+  border-radius:999px;
+  padding:0 16px;
+  cursor:pointer;
+  box-shadow:0 6px 18px rgba(40,28,10,0.16);
+  transition:transform 0.15s ease, background 0.15s ease;
+  font-family:'Inter',sans-serif;
+}
+.likes:hover{ transform:translateY(-2px); background:var(--sand-deep); }
+.likes:active{ transform:translateY(0) scale(0.96); }
+.likes-heart{ font-size:1.35rem; line-height:1; transition:transform 0.25s ease; }
+.likes.bump .likes-heart{ transform:scale(1.25); }
+.likes-count{
+  display:block;
+  font-family:'Quicksand',sans-serif;
+  font-weight:700;
+  font-size:1.2rem;
+  color:var(--ink);
+}
+
+/* ---------- Decorative shell (beach vibe, opposite corner from likes) ---------- */
+.shell-deco{
+  position:fixed;
+  left:22px;
+  bottom:18px;
+  z-index:70; /* keep the joke control clickable above the overlay and nav */
+  width:64px;
+  height:64px;
+  opacity:0.95;
+  cursor:pointer;
+  background:none;
+  border:none;
+  border-radius:50%;
+  padding:0;
+  filter:drop-shadow(0 4px 10px rgba(40,28,10,0.22));
+  transition:filter 0.25s ease, opacity 0.2s ease, box-shadow 0.25s ease, transform 0.2s ease;
+}
+.shell-deco svg{ pointer-events:none; }
+.shell-deco:hover, .shell-deco:focus-visible{
+  opacity:1;
+  transform:translateY(-2px);
+  filter:drop-shadow(0 6px 16px rgba(217,122,99,0.45));
+  box-shadow:0 0 0 8px rgba(217,122,99,0.22), 0 0 26px 6px rgba(217,122,99,0.35);
+}
+.shell-deco:active{ opacity:0.85; }
+.shell-deco svg{ width:100%; height:100%; display:block; }
+/* Attention nudge — bounces a handful of times, repeating every 15s until
+   the shell has actually been clicked/opened once, then stops for good. */
+@keyframes shellNudge{
+  0%, 100% { transform:translateY(0); }
+  50% { transform:translateY(-14px); }
+}
+.shell-deco.nudge{
+  animation:shellNudge 0.35s ease-in-out 10;
+}
+/* Small pill tooltip that appears above the shell on hover/focus, so it
+   reads as clickable before anyone actually clicks it. */
+.shell-tooltip{
+  position:fixed;
+  left:22px;
+  bottom:90px;
+  z-index:70;
+  background:var(--ink);
+  color:var(--paper);
+  font-family:'Inter',sans-serif;
+  font-weight:600;
+  font-size:0.82rem;
+  padding:7px 14px;
+  border-radius:999px;
+  white-space:nowrap;
+  opacity:0;
+  transform:translateY(6px);
+  pointer-events:none;
+  transition:opacity 0.18s ease, transform 0.18s ease;
+}
+.shell-tooltip::after{
+  content:'';
+  position:absolute;
+  left:22px;
+  bottom:-4px;
+  width:9px;
+  height:9px;
+  background:var(--ink);
+  transform:rotate(45deg);
+}
+.shell-deco:hover + .shell-tooltip,
+.shell-deco:focus-visible + .shell-tooltip{
+  opacity:1;
+  transform:translateY(0);
+}
+/* Hint shown inside the modal after a shell fact, nudging people to click
+   the shell again instead of leaving them to guess it cycles. */
+.modal .shell-hint{
+  margin-top:14px;
+  font-size:0.85rem;
+  font-style:italic;
+  color:var(--ink-soft);
+}
+
+/* ---------- Copy-email flag ---------- */
+.email-wrap{ position:relative; display:inline-flex; }
+.copy-flag{
+  position:absolute;
+  left:50%;
+  top:100%;
+  transform:translateX(-50%);
+  margin-top:8px;
+  white-space:nowrap;
+  font-size:0.8rem;
+  font-weight:600;
+  color:var(--coral);
+  opacity:0;
+  transition:opacity 0.2s ease;
+  pointer-events:none;
+}
+.copy-flag.show{ opacity:1; }
+
+#story p, .prose p{
+  font-size:1.05rem;
+  line-height:1.75;
+  color:var(--ink-soft);
+  max-width:64ch;
+}
+
+.skills{
+  display:flex;
+  flex-wrap:wrap;
+  gap:10px;
+  margin-top:10px;
+}
+.skills span{
+  background:var(--paper);
+  border:1px solid var(--sand-line);
+  border-radius:999px;
+  padding:7px 16px;
+  font-size:0.88rem;
+  color:var(--ink-soft);
+}
+
+.timeline{
+  display:flex;
+  flex-direction:column;
+  gap:22px;
+  margin-top:14px;
+}
+.timeline .item{
+  border-left:2px solid var(--sand-deep);
+  padding-left:20px;
+}
+.timeline .item .when{
+  font-size:0.85rem;
+  color:var(--ink-soft);
+  margin-bottom:2px;
+}
+.timeline .item h3{
+  font-family:'Quicksand',sans-serif;
+  font-weight:600;
+  font-size:1.05rem;
+  margin:0 0 4px 0;
+}
+.timeline .item p{
+  font-size:0.95rem;
+  color:var(--ink-soft);
+  margin:0;
+  line-height:1.55;
+}
+
+footer#contact{
+  position:relative;
+  padding:96px 0 72px 0;
+  text-align:center;
+  border-top:1px solid var(--sand-line);
+  background:radial-gradient(ellipse 70% 100% at 50% 0%, rgba(127,179,196,0.14), transparent 70%);
+}
+footer#contact h2{ margin-bottom:14px; }
+footer#contact p{
+  color:var(--ink-soft);
+  font-size:1rem;
+  margin:0 0 28px 0;
+}
+footer#contact .links{
+  display:flex;
+  gap:26px;
+  justify-content:center;
+  flex-wrap:wrap;
+}
+footer#contact .links a{
+  font-weight:600;
+  font-size:0.95rem;
+  color:var(--ink);
+  text-decoration:none;
+  border-bottom:1px solid var(--sand-deep);
+  padding-bottom:2px;
+  border-radius:8px;
+  padding:6px 10px;
+  margin:-6px -10px;
+  transition:background 0.18s ease, color 0.18s ease, border-color 0.18s ease;
+}
+footer#contact .links a:hover,
+footer#contact .links a:focus-visible{
+  background:var(--sand-deep);
+  border-color:var(--coral);
+  color:var(--ink);
+}
+
+@media (max-width: 720px){
+  .cards{ grid-template-columns:1fr; }
+  header.nav nav{ gap:14px; }
+  header.nav nav a{ font-size:0.85rem; }
+  .journey-item{ flex-direction:column; gap:10px; }
+}
+
+/* Bigger boxes on laptop/desktop only for About, Journey and Work cards —
+   phone sizing above is untouched on purpose. */
+@media (min-width:861px){
+  .cards .card{ padding:36px; border-radius:26px; }
+  .cards .card h3{ font-size:1.32rem; }
+  .cards .card p, .cards .card p em{ font-size:1.08rem; line-height:1.65; }
+  .cards .card-icon{ width:46px; height:46px; font-size:1.4rem; }
+}
+
+@media (prefers-reduced-motion: reduce){
+  .hero-copy{ transition:none !important; transform:none !important; }
+  .scroll-cue-arrow{ animation:none; }
+}
+/* Work projects sit in sandy hulls, with their sails above the deck. */
+#work .project-card{
+  position:relative;
+  isolation:isolate;
+  display:flex;
+  flex-direction:column;
+  align-items:center;
+  justify-content:flex-end;
+  width:100%;
+  min-height:340px;
+  padding:148px 34px 38px;
+  overflow:visible;
+  border:0;
+  border-radius:0;
+  background:transparent;
+  box-shadow:none;
+  clip-path:none;
+  color:var(--ink);
+  text-align:center;
+  cursor:pointer;
+  filter:drop-shadow(0 11px 8px rgba(4,16,24,0.3));
+  transition:transform 0.22s ease, filter 0.22s ease;
+}
+#work .project-card::before{
+  content:'';
+  position:absolute;
+  z-index:0;
+  left:4%;
+  right:4%;
+  top:140px;
+  bottom:0;
+  background:
+    repeating-linear-gradient(12deg, rgba(118,88,43,0.045) 0 1px, transparent 1px 6px),
+    linear-gradient(160deg, #f5ebd5 0%, #e8d3a8 100%);
+  clip-path:polygon(0 0,100% 0,100% 45%,98% 60%,93% 73%,85% 84%,74% 92%,62% 98%,50% 100%,38% 98%,26% 92%,15% 84%,7% 73%,2% 60%,0 45%);
+  pointer-events:none;
+}
+#work .project-card::after{
+  content:'';
+  position:absolute;
+  z-index:1;
+  left:10%;
+  right:10%;
+  top:140px;
+  height:7px;
+  border-radius:50%;
+  background:#b48f56;
+  pointer-events:none;
+}
+#work .project-card > :not(.ship-illustration){
+  position:relative;
+  z-index:2;
+}
+#work .project-card h3{
+  margin:0 0 8px;
+  color:var(--ink);
+}
+#work .project-card p,
+#work .project-card p em{
+  margin:0;
+  color:var(--ink-soft) !important;
+}
+#work .ship-illustration{
+  position:absolute;
+  z-index:2;
+  top:0;
+  left:50%;
+  width:100%;
+  max-width:220px;
+  height:151px;
+  margin:0;
+  transform:translateX(-50%);
+  pointer-events:none;
+}
+#work .ship-mast{
+  top:4px;
+  height:145px;
+}
+#work .ship-sail{
+  top:15px;
+  width:62px;
+  height:94px;
+}
+#work .ship-sail-main{ left:calc(50% - 60px); }
+#work .ship-sail-side{
+  top:35px;
+  width:50px;
+  height:74px;
+}
+#work .ship-flag{ top:0; }
+#work .card-icon{ display:none; }
+#work .project-card:hover,
+#work .project-card:focus-visible{
+  transform:translateY(-5px);
+  filter:drop-shadow(0 16px 10px rgba(4,16,24,0.38));
+  outline:none;
+}
+#work .project-card:hover::before,
+#work .project-card:focus-visible::before{
+  background:
+    repeating-linear-gradient(12deg, rgba(118,88,43,0.05) 0 1px, transparent 1px 6px),
+    linear-gradient(160deg, #f8efd9 0%, #eddbb7 100%);
+}
+
+@media (max-width:720px){
+  #work .project-card{ min-height:328px; padding:148px 30px 34px; }
+}
+
+
+
+/* ---------- About cards: scallop-shell illustration, one colour each ---------- */
+#about .cards{ filter:drop-shadow(0 14px 14px rgba(20,50,70,0.3)); gap:30px; grid-template-columns:repeat(2, minmax(0, 460px)); justify-content:center; }
+@media (max-width:900px){ #about .cards{ grid-template-columns:minmax(0, 460px); } }
+#about .card.open-page{
+  --shell-ink:#1d3447;
+  position:relative;
+  isolation:isolate;
+  overflow:visible;
+  min-height:470px;
+  padding:25% 19% 15%;
+  border:0;
+  border-radius:0;
+  background:transparent;
+  box-shadow:none;
+  text-align:center;
+  align-items:center;
+  justify-content:flex-start;
+  transition:transform 0.22s ease, filter 0.22s ease;
+}
+#about .card.open-page::before{
+  content:'';
+  position:absolute;
+  inset:0;
+  z-index:-2;
+  background:url('../assets/shell-card.png') center / 100% 100% no-repeat;
+  pointer-events:none;
+}
+/* soft cream panel over the shell's ribs so the text stays easy to read */
+#about .card.open-page::after{
+  content:'';
+  position:absolute;
+  inset:15% 12% 8%;
+  z-index:-1;
+  background:radial-gradient(ellipse 50% 50% at 50% 50%, rgba(255,250,240,0.95) 0%, rgba(255,250,240,0.9) 62%, rgba(255,250,240,0) 100%);
+  pointer-events:none;
+  display:block;
+}
+/* second shell: same illustration, recoloured (pink ribs on an aqua shell) */
+#about .card.open-page:nth-child(2)::before{ filter:hue-rotate(150deg) saturate(1.25); }
+#about .card h3{ color:var(--shell-ink); text-shadow:none; font-size:1.15rem; }
+#about .card p, #about .card p em{ color:var(--shell-ink) !important; opacity:0.9; font-size:0.92rem; line-height:1.5; margin:0 0 12px; }
+#about .card-thumb{
+  width:104px; height:104px; flex:0 0 auto;
+  object-fit:cover;
+  border-radius:50%;
+  border:4px solid #fff;
+  background:#fff;
+  box-shadow:0 6px 14px rgba(40,30,30,0.3);
+  margin:0 auto 10px;
+}
+#about .card-cta{ background:#1f6f9a; color:#fff; box-shadow:0 5px 12px rgba(20,60,90,0.35); margin-top:auto; }
+#about .card.open-page:hover,
+#about .card.open-page:focus-visible{
+  border:0;
+  box-shadow:none;
+  transform:translateY(-6px) scale(1.02);
+  filter:brightness(1.05) saturate(1.1);
+  outline:none;
+}
+#about .card.open-page:hover .card-cta,
+#about .card.open-page:focus-visible .card-cta{ background:#16577b; }
+@media (max-width:720px){
+  #about .card.open-page{ min-height:440px; padding:26% 17% 15%; }
+}
+
+/* Ship hulls: a little colour variety */
+#work .project-card:nth-child(2)::before{
+  background:repeating-linear-gradient(12deg, rgba(40,90,100,0.05) 0 1px, transparent 1px 6px), linear-gradient(160deg, #e6f3ee 0%, #b9dccf 100%);
+}
+#work .project-card:nth-child(3)::before{
+  background:repeating-linear-gradient(12deg, rgba(120,60,40,0.05) 0 1px, transparent 1px 6px), linear-gradient(160deg, #fdebdc 0%, #f1bfa2 100%);
+}
+
+/* Nothing of the site is visible until the whirlpool has fully played out */
+header.nav, .likes, .shell-deco, .shell-tooltip{ transition:opacity 0.6s ease; }
+body.whirlpool-locked header.nav,
+body.whirlpool-locked .likes,
+body.whirlpool-locked .shell-deco,
+body.whirlpool-locked .shell-tooltip{ opacity:0; visibility:hidden; }
+
+/* ---------- Every text page / pop-up uses the beach wind-chime photo ---------- */
+.modal-overlay,
+.modal-overlay.photo-backdrop,
+.modal-overlay.about-backdrop{
+  background-color:#e9f1f3;
+  background-image:
+    linear-gradient(rgba(250,245,233,0.72),rgba(250,245,233,0.86)),
+    url("../assets/modal-bg.webp");
+  background-size:cover;
+  background-position:center;
+  background-attachment:fixed;
+}
+
+/* ---------- Hero greeting: clean font, frosted card, warm accent ---------- */
+.hero-card{
+  max-width:min(92vw, 800px);
+  padding:clamp(24px,4vw,40px) clamp(22px,5vw,52px);
+  border-radius:30px;
+  background:linear-gradient(160deg, rgba(6,38,50,0.52), rgba(3,22,32,0.46));
+  -webkit-backdrop-filter:blur(10px) saturate(1.2);
+  backdrop-filter:blur(10px) saturate(1.2);
+  border:1px solid rgba(255,255,255,0.28);
+  box-shadow:0 24px 60px rgba(0,0,0,0.38), inset 0 1px 0 rgba(255,255,255,0.25);
+}
+.hero-copy .greeting{
+  font-family:'Poppins','Inter','Segoe UI',Arial,sans-serif;
+  font-weight:700;
+  font-size:clamp(1.8rem, 4.7vw, 3.2rem);
+  line-height:1.15;
+  text-wrap:balance;
+  letter-spacing:-0.015em;
+  color:#fff;
+  margin:0 0 20px;
+  text-shadow:0 2px 12px rgba(0,0,0,0.45);
+}
+.hero-copy .greeting .name-accent{
+  color:#ffcf9f;
+  background:linear-gradient(100deg, #ffe3b8 0%, #ffb48a 55%, #ff8f7a 100%);
+  -webkit-background-clip:text;
+  background-clip:text;
+  -webkit-text-fill-color:transparent;
+  text-shadow:none;
+}
+.hero-copy .greeting::after{
+  content:'';
+  display:block;
+  width:68px; height:4px;
+  margin:18px auto 0;
+  border-radius:4px;
+  background:linear-gradient(90deg, #ffe3b8, #ff9d7e);
+}
+.hero-copy .role{
+  font-family:'Inter','Segoe UI',Arial,sans-serif;
+  font-weight:500;
+  font-size:clamp(1rem, 2.1vw, 1.28rem);
+  line-height:1.65;
+  color:#eef8fa;
+  max-width:40ch;
+  text-wrap:balance;
+  margin:0 auto;
+  text-shadow:0 1px 8px rgba(0,0,0,0.5);
+}
+
+/* ---------- Hover: things light up in their own colour ---------- */
+#about .card.open-page{ --glow:#ffd27a; --glow-soft:rgba(255,210,122,0.75); }
+#about .card.open-page:nth-child(2){ --glow:#4fd6ff; --glow-soft:rgba(79,214,255,0.75); }
+#about .card.open-page:hover,
+#about .card.open-page:focus-visible{
+  transform:translateY(-6px) scale(1.03);
+  filter:brightness(1.1) saturate(1.15)
+         drop-shadow(0 0 10px var(--glow))
+         drop-shadow(0 0 26px var(--glow-soft))
+         drop-shadow(0 0 54px var(--glow-soft));
+}
+#about .card.open-page:hover .card-cta,
+#about .card.open-page:focus-visible .card-cta{ box-shadow:0 0 0 3px var(--glow-soft), 0 6px 16px rgba(20,60,90,0.4); }
+
+#work .project-card{ --glow:#ffd98a; }
+#work .project-card:nth-child(2){ --glow:#8ff0cf; }
+#work .project-card:nth-child(3){ --glow:#ffa98a; }
+#work .project-card:hover,
+#work .project-card:focus-visible{
+  filter:drop-shadow(0 0 10px var(--glow)) drop-shadow(0 0 28px var(--glow)) drop-shadow(0 14px 10px rgba(4,16,24,0.38));
+}
+
+.shell-deco{ transition:transform 0.2s ease, filter 0.25s ease; }
+.shell-deco:hover, .shell-deco:focus-visible{
+  filter:drop-shadow(0 0 8px #ffb48a) drop-shadow(0 0 22px rgba(255,157,126,0.9)) brightness(1.08);
+}
+.stat-box:hover, .stat-box:focus-visible{
+  box-shadow:0 0 0 2px rgba(255,157,126,0.6), 0 0 28px rgba(255,157,126,0.6), 0 12px 26px rgba(217,122,99,0.3);
+}
+
+/* ---------- Work cards: cream by default, turn ocean blue on hover / click ---------- */
+#work .project-card h3, #work .project-card p, #work .project-card p em{ transition:color 0.25s ease; }
+#work .project-card:hover::before,
+#work .project-card:focus-visible::before,
+#work .project-card:active::before{
+  background:
+    repeating-linear-gradient(12deg, rgba(255,255,255,0.07) 0 1px, transparent 1px 6px),
+    linear-gradient(160deg, #7fd3f0 0%, #2f8fc0 55%, #1b5f8f 100%);
+}
+#work .project-card:hover h3,
+#work .project-card:focus-visible h3,
+#work .project-card:active h3{ color:#fff; text-shadow:0 1px 3px rgba(5,30,55,0.45); }
+#work .project-card:hover p, #work .project-card:hover p em,
+#work .project-card:focus-visible p, #work .project-card:focus-visible p em,
+#work .project-card:active p, #work .project-card:active p em{ color:#eaf7fd !important; }
+#work .project-card:hover::after,
+#work .project-card:focus-visible::after,
+#work .project-card:active::after{ background:#dff4fc; }
+#work .project-card:hover,
+#work .project-card:focus-visible,
+#work .project-card:active{
+  filter:drop-shadow(0 0 10px #4fc3f7) drop-shadow(0 0 28px rgba(79,195,247,0.85)) drop-shadow(0 14px 10px rgba(4,16,24,0.38));
+}
+#work .project-card:hover,
+#work .project-card:focus-visible,
+#work .project-card:active{ background:transparent !important; box-shadow:none !important; clip-path:none !important; border:0 !important; }
