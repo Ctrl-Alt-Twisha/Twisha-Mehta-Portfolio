@@ -182,15 +182,39 @@ body.whirlpool-locked .shell-tooltip{ pointer-events:none; }
   pointer-events:none;
   transition:opacity 0.4s ease;
 }
-.scroll-cue-arrow{ font-size:1.35rem; line-height:1; animation:cueFloat 1.6s ease-in-out infinite; }
-@keyframes cueFloat{ 50%{ transform:translateY(6px); } }
-.whirlpool-fallback{ background-position:center; background-size:cover; }
-.portfolio-start{
-  display:flex;
-  align-items:center;
-  min-height:66svh;
-  padding:90px 0;
-  background:linear-gradient(135deg,#ebd0a3,#f5ebe0 55%,#e6cb9d);
+.scroll-cue {
+  position: fixed;
+  z-index: 100;           /* High z-index keeps it above hero background & canvas */
+  left: 50%;
+  bottom: 30px;
+  transform: translateX(-50%);
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 6px;
+  color: #ffffff;         /* Solid white for maximum contrast */
+  font-family: 'Inter', sans-serif;
+  font-weight: 600;
+  font-size: 0.75rem;
+  letter-spacing: 0.15em;
+  text-shadow: 0 2px 10px rgba(0, 0, 0, 0.8);
+  pointer-events: none;
+  opacity: 1 !important;   /* Force visible on load */
+  visibility: visible !important;
+}
+
+.scroll-cue-arrow {
+  font-size: 1.35rem;
+  line-height: 1;
+  animation: cueFloat 1.6s ease-in-out infinite;
+}
+/* Ensure scroll cue is NOT hidden while the page loads */
+body.whirlpool-locked .scroll-cue {
+  opacity: 1 !important;
+  visibility: visible !important;
+}
+@keyframes cueFloat {
+  50% { transform: translateY(6px); }
 }
 .portfolio-start .wrap{ max-width:960px; }
 .start-kicker{ margin:0 0 16px; color:var(--coral); font:700 0.78rem 'Inter',sans-serif; }
