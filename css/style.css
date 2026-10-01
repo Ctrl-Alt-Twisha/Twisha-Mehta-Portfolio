@@ -132,6 +132,12 @@ body.whirlpool-locked .shell-tooltip{ pointer-events:none; }
   background:linear-gradient(180deg,rgba(2,18,25,0.16),rgba(2,18,25,0.08) 46%,rgba(2,18,25,0.34));
   pointer-events:none;
 }
+/* Disable scrolling after whirlpool finishes */
+body.whirlpool-locked {
+  overflow: hidden !important;
+  height: 100vh !important;
+  touch-action: none; /* Prevents touch dragging on mobile */
+}
 .hero-copy{
   position:absolute;
   inset:0;
